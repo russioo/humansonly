@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --pink-primary: #f736dd;
+  --pink-light: #ffc9ef;
+  --pink-lighter: #ffe4f7;
+  --pink-lightest: #fff0fb;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(180deg, var(--pink-lightest) 0%, var(--pink-lighter) 100%);
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--pink-primary);
+  color: white;
+}
+
+/* Override rose colors with our pink */
+.bg-rose-400, .bg-rose-500 {
+  background-color: var(--pink-primary) !important;
+}
+
+.text-rose-400, .text-rose-500 {
+  color: var(--pink-primary) !important;
+}
+
+.border-rose-400, .border-rose-500 {
+  border-color: var(--pink-primary) !important;
+}
+
+.from-rose-400 {
+  --tw-gradient-from: var(--pink-primary) !important;
+}
+
+.to-rose-600 {
+  --tw-gradient-to: #e91ed0 !important;
+}
