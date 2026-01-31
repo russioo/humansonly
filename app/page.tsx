@@ -254,7 +254,7 @@ export default function Home() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Verification Card */}
-            {!user?.profile?.is_verified_human && (
+            {!user?.is_verified_human && (
               <div className="bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl p-5 text-white">
                 <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center mb-4">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
