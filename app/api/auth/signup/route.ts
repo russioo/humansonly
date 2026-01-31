@@ -7,11 +7,48 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+async function verifyCaptcha(token: string): Promise<boolean> {
+  const secretKey = process.env.TURNSTILE_SECRET_KEY
+
+  // If no secret key, skip verification (dev mode)
+  if (!secretKey) {
+    console.warn('TURNSTILE_SECRET_KEY not set - skipping verification')
+    return true
+  }
+
+  try {
+    const formData = new FormData()
+    formData.append('secret', secretKey)
+    formData.append('response', token)
+
+    const result = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: formData,
+    })
+
+    const outcome = await result.json()
+    return outcome.success === true
+  } catch (error) {
+    console.error('CAPTCHA verification error:', error)
+    return false
+  }
+}
+
 export async function POST(request: Request) {
   try {
-    const { email, password, username } = await request.json()
+    const { email, password, username, captchaToken } = await request.json()
 
-    // Validate
+    // Validate CAPTCHA first
+    if (!captchaToken) {
+      return NextResponse.json({ error: 'CAPTCHA verification required' }, { status: 400 })
+    }
+
+    const captchaValid = await verifyCaptcha(captchaToken)
+    if (!captchaValid) {
+      return NextResponse.json({ error: 'CAPTCHA verification failed. Please try again.' }, { status: 400 })
+    }
+
+    // Validate fields
     if (!email || !password || !username) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
@@ -53,7 +90,7 @@ export async function POST(request: Request) {
     // Hash password
     const passwordHash = await hashPassword(password)
 
-    // Create user
+    // Create user - mark as verified since they passed CAPTCHA
     const userId = crypto.randomUUID()
     
     const { error: insertError } = await supabase
@@ -64,7 +101,7 @@ export async function POST(request: Request) {
         email: email.toLowerCase(),
         password_hash: passwordHash,
         display_name: username,
-        is_verified_human: false,
+        is_verified_human: true, // Verified via CAPTCHA at signup
         karma: 0,
         post_karma: 0,
         comment_karma: 0,

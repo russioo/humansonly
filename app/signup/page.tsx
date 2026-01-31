@@ -4,17 +4,25 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Logo from '@/components/Logo'
+import { Turnstile } from '@marsidev/react-turnstile'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!turnstileToken) {
+      setError('Please complete the CAPTCHA verification')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -26,6 +34,7 @@ export default function SignupPage() {
           email,
           password,
           username: username.toLowerCase(),
+          captchaToken: turnstileToken,
         }),
       })
 
@@ -37,8 +46,8 @@ export default function SignupPage() {
         return
       }
 
-      // Success! Redirect to human verification
-      router.push('/verify')
+      // Success! Redirect to feed (already verified via CAPTCHA)
+      router.push('/feed')
     } catch (err) {
       setError('Something went wrong. Please try again.')
       setLoading(false)
@@ -97,6 +106,17 @@ export default function SignupPage() {
             />
           </div>
 
+          <div className="flex justify-center py-2">
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+              onSuccess={(token) => setTurnstileToken(token)}
+              onError={() => setError('CAPTCHA failed. Please refresh and try again.')}
+              options={{
+                theme: 'light',
+              }}
+            />
+          </div>
+
           {error && (
             <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg">
               {error}
@@ -105,7 +125,7 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !turnstileToken}
             className="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
           >
             {loading ? 'Creating account...' : 'Create account'}
