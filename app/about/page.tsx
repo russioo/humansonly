@@ -27,9 +27,9 @@ export default function AboutPage() {
 
           <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">How we verify humans</h2>
           <p className="text-gray-600 leading-relaxed mb-6">
-            Every user goes through our human verification process. We use a combination of 
-            simple cognitive challenges and behavioral analysis to ensure you are a real person.
-            No third-party tracking. No data collection. Just a quick check.
+            Every user must pass Cloudflare Turnstile verification before creating an account. 
+            This advanced CAPTCHA technology ensures that no AI bots or automated systems can 
+            sign up or access our platform. Only verified humans get in. No exceptions.
           </p>
 
           <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">Our values</h2>
