@@ -57,7 +57,7 @@ export function createServerSupabase() {
         async getAll() {
           return (await cookieStore).getAll()
         },
-        async setAll(cookiesToSet) {
+        async setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
           try {
             const store = await cookieStore
             cookiesToSet.forEach(({ name, value, options }) =>
